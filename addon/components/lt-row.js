@@ -10,7 +10,7 @@ const Row = Component.extend({
   layout,
   tagName: 'tr',
   classNames: ['lt-row'],
-  classNameBindings: ['isSelected', 'isExpanded', 'canExpand:is-expandable', 'canSelect:is-selectable', 'row.classNames'],
+  classNameBindings: ['canExpand:is-expandable', 'canSelect:is-selectable', 'row.classNames'],
   attributeBindings: ['colspan'],
 
   columns: null,
@@ -19,9 +19,6 @@ const Row = Component.extend({
   canExpand: false,
   canSelect: false,
   colpan: 1,
-
-  isSelected: computed.readOnly('row.selected'),
-  isExpanded: computed.readOnly('row.expanded')
 });
 
 Row.reopenClass({

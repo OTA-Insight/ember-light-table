@@ -165,48 +165,14 @@ export default Component.extend({
   columns: computed.readOnly('table.visibleColumns'),
   colspan: computed.readOnly('columns.length'),
 
-  _currSelectedIndex: -1,
-  _prevSelectedIndex: -1,
-
   actions: {
     /**
-     * onRowClick action. Handles selection, and row expansion.
+     * onRowClick action.
      * @event onRowClick
      * @param  {Row}   row The row that was clicked
      * @param  {Event}   event   The click event
      */
     onRowClick(row, e) {
-      let rows = this.get('table.rows');
-      let multiSelect = this.get('multiSelect');
-      let canSelect = this.get('canSelect');
-      let isSelected = row.get('selected');
-      let currIndex = rows.indexOf(row);
-      let prevIndex = this._prevSelectedIndex === -1 ? currIndex : this._prevSelectedIndex;
-
-      this._currSelectedIndex = currIndex;
-      this._prevSelectedIndex = prevIndex;
-
-      if (canSelect) {
-        if (e.shiftKey && multiSelect) {
-          rows.slice(Math.min(currIndex, prevIndex), Math.max(currIndex, prevIndex) + 1).forEach(r => r.set('selected', !isSelected));
-          this._prevSelectedIndex = currIndex;
-        } else if ((e.ctrlKey || e.metaKey) && multiSelect) {
-          row.toggleProperty('selected');
-        } else {
-          this.get('table.selectedRows').setEach('selected', false);
-          row.set('selected', !isSelected);
-
-          if (this.get('canExpand') && this.get('expandOnClick')) {
-            this.togglExpandedRow(row);
-          }
-        }
-        this._prevSelectedIndex = currIndex;
-      } else {
-        if (this.get('canExpand') && this.get('expandOnClick')) {
-          this.togglExpandedRow(row);
-        }
-      }
-
       callAction(this, 'onRowClick', ...arguments);
     },
 
@@ -218,15 +184,6 @@ export default Component.extend({
      */
     onRowDoubleClick(/* row */) {
       callAction(this, 'onRowDoubleClick', ...arguments);
-    },
-
-    /**
-     * onScrolledToBottom action - sent when user scrolls to the bottom
-     *
-     * @event onScrolledToBottom
-     */
-    onScrolledToBottom() {
-      callAction(this, 'onScrolledToBottom');
     }
   }
 });
