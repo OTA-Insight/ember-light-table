@@ -168,34 +168,6 @@ export default Component.extend({
   _currSelectedIndex: -1,
   _prevSelectedIndex: -1,
 
-  init() {
-    this._super(...arguments);
-
-    /*
-      We can only set `useVirtualScrollbar` once all contextual components have
-      been initialized since fixedHeader and fixedFooter are set on t.head and t.foot
-      initialization.
-     */
-    run.once(this, this._setupVirtualScrollbar);
-  },
-
-  _setupVirtualScrollbar() {
-    const { fixedHeader, fixedFooter } = this.get('sharedOptions');
-    this.set('useVirtualScrollbar', fixedHeader || fixedFooter);
-  },
-
-  togglExpandedRow(row) {
-    let multi = this.get('multiRowExpansion');
-    let shouldExpand = !row.expanded;
-
-    if (multi) {
-      row.toggleProperty('expanded');
-    } else {
-      this.get('table.expandedRows').setEach('expanded', false);
-      row.set('expanded', shouldExpand);
-    }
-  },
-
   actions: {
     /**
      * onRowClick action. Handles selection, and row expansion.
