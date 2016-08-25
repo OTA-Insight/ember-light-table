@@ -8,10 +8,8 @@
           {{component (concat 'light-table/columns/' column.type) column
               table=table
               tableActions=tableActions
-              sortIcons=sortIcons
               click=(action 'onColumnClick' column)
-              doubleClick=(action 'onColumnDoubleClick' column)
-              columnResized=(action 'onColumnResized')}}
+              doubleClick=(action 'onColumnDoubleClick' column)}}
         {{/each}}
       </tr>
     {{/if}}

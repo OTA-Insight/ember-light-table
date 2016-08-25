@@ -46,30 +46,30 @@ export default Ember.Mixin.create({
   /**
    * @property sortOnClick
    * @type {Boolean}
-   * @default true
+   * @default false
    */
-  sortOnClick: true,
+  sortOnClick: false,
 
   /**
    * @property multiColumnSort
    * @type {Boolean}
    * @default false
    */
-  multiColumnSort: false,
+  //multiColumnSort: false,
 
   /**
    * @property iconAscending
    * @type {String}
    * @default ''
    */
-  iconAscending: '',
+  //iconAscending: '',
 
   /**
    * @property iconDescending
    * @type {String}
    * @default ''
    */
-  iconDescending: '',
+  //iconDescending: '',
 
   /**
    * ID of main table component. Used to generate divs for ember-wormhole
@@ -77,14 +77,7 @@ export default Ember.Mixin.create({
    */
   tableId: null,
 
-  renderInPlace: computed.oneWay('fixed'),
   columnGroups: computed.readOnly('table.visibleColumnGroups'),
-  subColumns: computed.readOnly('table.visibleSubColumns'),
-  columns: computed.readOnly('table.visibleColumns'),
-
-  sortIcons: computed('iconAscending', 'iconDescending', function() {
-    return this.getProperties(['iconAscending', 'iconDescending']);
-  }).readOnly(),
 
   actions: {
     /**
@@ -95,16 +88,6 @@ export default Ember.Mixin.create({
      * @param  {Event}   event   The click event
      */
     onColumnClick(column) {
-      if(column.sortable && this.get('sortOnClick')) {
-        if(column.sorted) {
-          column.toggleProperty('ascending');
-        } else {
-          if(!this.get('multiColumnSort')) {
-            this.get('table.sortedColumns').setEach('sorted', false);
-          }
-          column.set('sorted', true);
-        }
-      }
       callAction(this, 'onColumnClick', ...arguments);
     },
 

@@ -49,10 +49,5 @@ export default Component.extend(TableHeaderMixin, {
     this._super(...arguments);
 
     const sharedOptions = this.get('sharedOptions') || {};
-    const fixed = this.get('fixed');
-
-    assert('[ember-light-table] The height property is required for fixed header', !fixed || fixed && !isEmpty(sharedOptions.height));
-
-    set(sharedOptions, 'fixedHeader', fixed);
   }
 });
