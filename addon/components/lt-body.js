@@ -308,7 +308,9 @@ export default Component.extend({
 
   _setupVirtualScrollbar() {
     let { fixedHeader, fixedFooter } = this.get('sharedOptions');
-    this.set('useVirtualScrollbar', fixedHeader || fixedFooter);
+    //this.set('useVirtualScrollbar', fixedHeader || fixedFooter);
+    // This will make sure that the virtual scrollbar is always false (default value).
+    // We will handle the scrollbars ourselves (needed for fixed columns/horizontal scrolling)
   },
 
   onRowsChange: observer('rows.[]', function() {
