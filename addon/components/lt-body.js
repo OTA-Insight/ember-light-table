@@ -16,7 +16,7 @@ const {
 /**
  * ```hbs
  * {{#light-table table as |t|}}
- *   {{#t.body multiSelect=true onRowClick=(action 'rowClicked')}}
+ *   {{#t.body multiSelect=true onRowClick=(action 'rowClicked') as |body|}}
  *     {{#body.expanded-row as |row|}}
  *       Hello <b>{{row.firstName}}</b>
  *     {{/body.expanded-row}}
@@ -341,7 +341,7 @@ export default Component.extend({
       });
     } else if (scrollToRow !== _scrollToRow) {
       if (scrollToRow instanceof Row) {
-        let rowElement = document.getElementById(scrollToRow.get('rowId'));
+        let rowElement = this.element.querySelector(`[data-row-id=${scrollToRow.get('rowId')}]`);
 
         if (rowElement instanceof Element) {
           targetScrollOffset = rowElement.offsetTop;
@@ -440,7 +440,7 @@ export default Component.extend({
     },
 
     /**
-     * onScroll action - sent when user scrolls
+     * onScroll action - sent when user scrolls in the Y direction
      *
      * This only works when `useVirtualScrollbar` is `true`, i.e. when you are
      * using fixed headers / footers.
