@@ -1,13 +1,9 @@
-import Ember from 'ember';
+import Component from '@ember/component';
+import { computed } from '@ember/object';
+import { isEmpty } from '@ember/utils';
 import layout from 'ember-light-table/templates/components/columns/base';
 import DraggableColumnMixin from 'ember-light-table/mixins/draggable-column';
 import cssStyleify from 'ember-light-table/utils/css-styleify';
-
-const {
-  Component,
-  computed,
-  isEmpty
-} = Ember;
 
 /**
  * @module Light Table
@@ -67,10 +63,33 @@ const Column = Component.extend(DraggableColumnMixin, {
   tableActions: null,
 
   /**
+   * @property extra
+   * @type {Object}
+   */
+  extra: null,
+
+  /**
    * @property sortIcons
    * @type {Object}
    */
   sortIcons: null,
+
+  /**
+   * @property sortIconProperty
+   * @type {String|null}
+   * @private
+   */
+  sortIconProperty: computed('column.{sortable,sorted,ascending}', function() {
+    let sorted = this.get('column.sorted');
+
+    if (sorted) {
+      let ascending = this.get('column.ascending');
+      return ascending ? 'iconAscending' : 'iconDescending';
+    }
+
+    let sortable = this.get('column.sortable');
+    return sortable ? 'iconSortable' : null;
+  }),
 
   /**
    * @property colspan

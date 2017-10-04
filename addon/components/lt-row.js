@@ -1,10 +1,6 @@
-import Ember from 'ember';
+import Component from '@ember/component';
+import { computed } from '@ember/object';
 import layout from 'ember-light-table/templates/components/lt-row';
-
-const {
-  Component,
-  computed
-} = Ember;
 
 const Row = Component.extend({
   layout,
@@ -16,6 +12,7 @@ const Row = Component.extend({
   columns: null,
   row: null,
   tableActions: null,
+  extra: null,
   canExpand: false,
   canSelect: false,
   colspan: 1,

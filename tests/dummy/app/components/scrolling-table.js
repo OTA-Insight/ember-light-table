@@ -1,12 +1,9 @@
 // BEGIN-SNIPPET scrolling-table
-import Ember from 'ember';
+import Component from '@ember/component';
 import TableCommon from '../mixins/table-common';
+import { computed } from '@ember/object';
 
-const {
-  computed
-} = Ember;
-
-export default Ember.Component.extend(TableCommon, {
+export default Component.extend(TableCommon, {
   currentScrollOffset: 0,
   scrollTo: 0,
   scrollToRow: null,

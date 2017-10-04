@@ -1,7 +1,9 @@
+import { click, find, findAll } from 'ember-native-dom-helpers';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import Table from 'ember-light-table';
 import Columns, { GroupedColumns } from '../../helpers/table-columns';
+import hasClass from '../../helpers/has-class';
 
 moduleForComponent('lt-head', 'Integration | Component | lt head', {
   integration: true
@@ -12,7 +14,7 @@ test('render columns', function(assert) {
 
   this.render(hbs`{{lt-head table=table renderInPlace=true}}`);
 
-  assert.equal(this.$('tr > th').length, 6);
+  assert.equal(findAll('tr > th').length, 6);
 });
 
 test('render grouped columns', function(assert) {
@@ -20,24 +22,25 @@ test('render grouped columns', function(assert) {
 
   this.render(hbs`{{lt-head table=table renderInPlace=true}}`);
 
-  assert.equal(this.$('tr:nth-child(2) > th').attr('colspan'), 3);
-  assert.ok(this.$('tr:nth-child(2) > th').hasClass('lt-group-column'));
-  assert.equal(this.$('tr').length, 3);
-  assert.equal(this.$('tr > th').length, 8);
+  assert.equal(find('tr:nth-child(2) > th').getAttribute('colspan'), 3);
+  assert.ok(find('tr:nth-child(2) > th').classList.contains('lt-group-column'));
+  assert.equal(findAll('tr').length, 3);
+  assert.equal(findAll('tr > th').length, 8);
 });
 
 test('click - non-sortable column', function(assert) {
   this.set('table', new Table(Columns));
   this.on('onColumnClick', (column) => {
     assert.ok(column);
-    assert.ok(!column.sortable);
+    assert.notOk(column.sortable);
     assert.equal(column.label, 'Avatar');
   });
 
   this.render(hbs`{{lt-head table=table renderInPlace=true onColumnClick=(action 'onColumnClick')}}`);
 
-  assert.equal(this.$('tr > th').length, 6);
-  this.$('tr > th:first').click();
+  assert.equal(findAll('tr > th').length, 6);
+  let nonSortableHeader = find('tr > th');
+  click(nonSortableHeader);
 });
 
 test('click - sortable column', function(assert) {
@@ -52,23 +55,55 @@ test('click - sortable column', function(assert) {
   });
 
   this.render(hbs`{{lt-head table=table renderInPlace=true onColumnClick=(action 'onColumnClick')}}`);
-
-  assert.equal(this.$('tr > th').length, 6);
-  this.$('tr > th:last').click();
+  let allHeaders = findAll('tr > th');
+  let sortableHeader = allHeaders[allHeaders.length - 1];
+  assert.equal(findAll('tr > th').length, 6);
+  click(sortableHeader);
   asc = false;
-  this.$('tr > th:last').click();
+  click(sortableHeader);
+});
+
+test('render sort icons', function(assert) {
+  this.set('table', new Table(Columns));
+
+  this.render(hbs`{{lt-head table=table renderInPlace=true iconSortable='fa-sort' iconAscending='fa-sort-asc' iconDescending='fa-sort-desc'}}`);
+
+  let allHeaders = findAll('tr > th ');
+  let sortableHeader = allHeaders[allHeaders.length - 1];
+  let sortIcon = find('.lt-sort-icon', sortableHeader);
+
+  // Sortable case
+  assert.ok(hasClass(sortIcon, 'fa-sort'), 'Sortable icon renders');
+  assert.notOk(hasClass(sortIcon, 'fa-sort-asc'));
+  assert.notOk(hasClass(sortIcon, 'fa-sort-desc'));
+
+  click(sortableHeader);
+
+  // Ascending case
+  assert.ok(hasClass(sortIcon, 'fa-sort-asc'), 'Ascending icon renders');
+  assert.notOk(hasClass(sortIcon, 'fa-sort'));
+  assert.notOk(hasClass(sortIcon, 'fa-sort-desc'));
+
+  click(sortableHeader);
+
+  // Descending case
+  assert.ok(hasClass(sortIcon, 'fa-sort-desc'), 'Descending icon renders');
+  assert.notOk(hasClass(sortIcon, 'fa-sort'));
+  assert.notOk(hasClass(sortIcon, 'fa-sort-asc'));
 });
 
 test('double click', function(assert) {
   this.set('table', new Table(Columns));
   this.on('onColumnDoubleClick', (column) => {
     assert.ok(column);
-    assert.ok(!column.sortable);
+    assert.notOk(column.sortable);
     assert.equal(column.label, 'Avatar');
   });
 
   this.render(hbs`{{lt-head table=table renderInPlace=true onColumnDoubleClick=(action 'onColumnDoubleClick')}}`);
+  let allHeaders = findAll('tr > th');
+  let sortableHeader = allHeaders[allHeaders.length - 1];
 
-  assert.equal(this.$('tr > th').length, 6);
-  this.$('tr > th:last').click();
+  assert.equal(allHeaders.length, 6);
+  click(sortableHeader);
 });

@@ -1,9 +1,9 @@
 {{#if column.component}}
-  {{component column.component column=column table=table tableActions=tableActions sortIcons=sortIcons}}
+  {{component column.component column=column table=table tableActions=tableActions extra=extra sortIcons=sortIcons}}
 {{else}}
   {{label}}
-  {{#if column.sorted}}
-    <i class="lt-sort-icon {{if column.ascending sortIcons.iconAscending sortIcons.iconDescending}}"></i>
+  {{#if sortIconProperty}}
+    <i class="lt-sort-icon {{get sortIcons sortIconProperty}}"></i>
   {{/if}}
 {{/if}}
 

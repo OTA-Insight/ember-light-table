@@ -1,13 +1,14 @@
-import Ember from 'ember';
-
-const { computed, guidFor } = Ember;
+import ObjectProxy from '@ember/object/proxy';
+import { computed } from '@ember/object';
+import { guidFor } from '@ember/object/internals';
+import fixProto from 'ember-light-table/utils/fix-proto';
 
 /**
  * @module Table
  * @extends Ember.ObjectProxy
  * @class Row
  */
-export default class Row extends Ember.ObjectProxy.extend({
+export default class Row extends ObjectProxy.extend({
   /**
    * Whether the row is hidden.
    *
@@ -84,12 +85,18 @@ export default class Row extends Ember.ObjectProxy.extend({
    * @param {Object} options
    */
   constructor(content, options = {}) {
+    // TODO: Revert this, when babel#5862 is resolved.
+    //       https://github.com/babel/babel/issues/5862
+    super();
+
     if (content instanceof Row) {
       return content;
     }
 
-    super();
     this.setProperties(options);
     this.set('content', content);
   }
 }
+
+// https://github.com/offirgolan/ember-light-table/issues/436#issuecomment-310138868
+fixProto(Row);

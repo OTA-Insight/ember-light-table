@@ -1,18 +1,14 @@
-import Ember from 'ember';
-
-const {
-  guidFor,
-  isEmpty,
-  makeArray,
-  computed,
-  A: emberArray
-} = Ember;
+import { A as emberArray, makeArray } from '@ember/array';
+import EmberObject, { computed } from '@ember/object';
+import { isEmpty } from '@ember/utils';
+import { guidFor } from '@ember/object/internals';
+import fixProto from 'ember-light-table/utils/fix-proto';
 
 /**
  * @module Table
  * @class Column
  */
-export default class Column extends Ember.Object.extend({
+export default class Column extends EmberObject.extend({
   /**
    * Whether the column can be hidden.
    *
@@ -325,11 +321,14 @@ export default class Column extends Ember.Object.extend({
    * @param {Object} options
    */
   constructor(options = {}) {
+    // TODO: Revert this, when babel#5862 is resolved.
+    //       https://github.com/babel/babel/issues/5862
+    super();
+
     if (options instanceof Column) {
       return options;
     }
 
-    super();
     this.setProperties(options);
 
     let { subColumns } = options;
@@ -340,3 +339,6 @@ export default class Column extends Ember.Object.extend({
     this.set('subColumns', subColumns);
   }
 }
+
+// https://github.com/offirgolan/ember-light-table/issues/436#issuecomment-310138868
+fixProto(Column);

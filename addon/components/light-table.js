@@ -1,19 +1,13 @@
-import Ember from 'ember';
+import { A as emberArray } from '@ember/array';
+import Component from '@ember/component';
+import { computed, observer } from '@ember/object';
+import { isEmpty, isNone } from '@ember/utils';
+import { assert } from '@ember/debug';
+import { on } from '@ember/object/evented';
+import { inject as service } from '@ember/service';
 import layout from 'ember-light-table/templates/components/light-table';
 import Table from 'ember-light-table/classes/Table';
 import cssStyleify from 'ember-light-table/utils/css-styleify';
-
-const {
-  assert,
-  Component,
-  computed,
-  inject,
-  observer,
-  on,
-  isNone,
-  isEmpty,
-  A: emberArray
-} = Ember;
 
 function intersections(array1, array2) {
   return array1.filter((n) => {
@@ -47,7 +41,7 @@ const LightTable = Component.extend({
   classNameBindings: [':ember-light-table'],
   attributeBindings: ['style'],
 
-  media: inject.service(),
+  media: service(),
 
   /**
    * @property table
@@ -56,7 +50,7 @@ const LightTable = Component.extend({
   table: null,
 
   /**
-   * This is used to propate custom user defined actions to custom cell and header components.
+   * This is used to propagate custom user defined actions to custom cell and header components.
    * As an example, lets say I have a table with a column defined with `cellComponent: 'delete-user'`
    *
    * ```hbs
@@ -81,6 +75,34 @@ const LightTable = Component.extend({
    * @type {Object}
    */
   tableActions: null,
+
+  /**
+   * Object to store any arbitrary configuration meant to be used by custom
+   * components.
+   *
+   * ```hbs
+   * {{#light-table table
+   *   extra=(hash
+   *     highlightColor="yellow"
+   *    )
+   *    as |t|
+   *  }}
+   *   {{t.head}}
+   *   {{t.body}}
+   *   {{t.foot}}
+   * {{/light-table}}
+   * ```
+   *
+   * Now in all custom components, you can access this value like so:
+   *
+   * ```hbs
+   * <span style="background: {{extra.highlightColor}}">{{value}}<span>
+   * ```
+   *
+   * @property extra
+   * @type {Object}
+   */
+  extra: null,
 
   /**
    * Table height.
@@ -180,8 +202,8 @@ const LightTable = Component.extend({
     unit = unit[0];
 
     /*
-      1. Check if all widths are present
-      2. Check if all widths are the same unit
+     1. Check if all widths are present
+     2. Check if all widths are the same unit
      */
     for (let i = 0; i < widths.length; i++) {
       let width = widths[i];

@@ -1,13 +1,10 @@
-import Ember from 'ember';
-
-const {
-  run,
-  computed
-} = Ember;
+import Mixin from '@ember/object/mixin';
+import { computed } from '@ember/object';
+import { run } from '@ember/runloop';
 
 let sourceColumn;
 
-export default Ember.Mixin.create({
+export default Mixin.create({
   classNameBindings: ['isDragging', 'isDragTarget', 'dragDirection'],
   attributeBindings: ['isDraggable:draggable'],
 
@@ -42,7 +39,7 @@ export default Ember.Mixin.create({
   isDropTarget: computed(function() {
     let column = this.get('column');
     /*
-      A column is a valid drop target only if its in the same group
+     A column is a valid drop target only if its in the same group
      */
     return column.get('droppable') && column.get('parent') === sourceColumn.get('parent');
   }).volatile().readOnly(),
@@ -53,7 +50,7 @@ export default Ember.Mixin.create({
     let column = this.get('column');
 
     /*
-      NOTE: IE requires setData type to be 'text'
+     NOTE: IE requires setData type to be 'text'
      */
     e.dataTransfer.setData('text', column.get('columnId'));
     e.dataTransfer.effectAllowed = 'move';
@@ -63,8 +60,8 @@ export default Ember.Mixin.create({
     this.sendAction('onColumnDrag', sourceColumn, ...arguments);
 
     /*
-      NOTE: This is a fix for Firefox to prevent the click event
-      from being triggered after a drop.
+     NOTE: This is a fix for Firefox to prevent the click event
+     from being triggered after a drop.
      */
     this.__click__ = this.click;
     this.click = undefined;
@@ -98,8 +95,8 @@ export default Ember.Mixin.create({
     this.setProperties({ isDragTarget: false, isDragging: false });
 
     /*
-      If sourceColumn still references a column, it means that a successful
-      drop did not happen.
+     If sourceColumn still references a column, it means that a successful
+     drop did not happen.
      */
     if (sourceColumn) {
       this.sendAction('onColumnDrop', sourceColumn, false, ...arguments);
@@ -107,7 +104,7 @@ export default Ember.Mixin.create({
     }
 
     /*
-      Restore click event
+     Restore click event
      */
     this._clickResetTimer = run.next(this, () => this.click = this.__click__);
   },

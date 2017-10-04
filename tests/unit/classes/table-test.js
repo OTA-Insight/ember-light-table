@@ -1,10 +1,6 @@
-import Ember from 'ember';
+import { A as emberArray } from '@ember/array';
 import { Table, Column, Row } from 'ember-light-table';
 import { module, test } from 'qunit';
-
-const {
-  A: emberArray
-} = Ember;
 
 module('Unit | Classes | Table');
 
@@ -25,6 +21,11 @@ test('create table - with options', function(assert) {
 
   assert.ok(table.rows[0] instanceof Row);
   assert.ok(table.columns[0] instanceof Column);
+});
+
+test('reopen table', function(assert) {
+  assert.equal(typeof Table.reopen, 'function', 'reopen is a function');
+  assert.equal(typeof Table.reopenClass, 'function', 'reopenClass is a function');
 });
 
 test('CP - visibleColumnGroups', function(assert) {
@@ -72,6 +73,29 @@ test('CP - allColumns', function(assert) {
 
   table.setColumns([col, group, group2]);
   assert.equal(table.get('allColumns.length'), 5);
+});
+
+test('CP - isEmpty', function(assert) {
+  let table = new Table([{}, {}], []);
+
+  assert.ok(table, 'table is set up correctly');
+  assert.ok(table.get('isEmpty'), 'table is initially empty');
+  table.pushRow({});
+  assert.notOk(table.get('isEmpty'), 'table is not empty after a row was pushed');
+  table.setRows([]);
+  assert.ok(table.get('isEmpty'), 'table is empty again after the rows were cleared');
+});
+
+test('CP - isEmpty (enableSync = true)', function(assert) {
+  let rowsArray = emberArray();
+  let table = new Table([{}, {}], rowsArray, { enableSync: true });
+
+  assert.ok(table, 'table is set up correctly');
+  assert.ok(table.get('isEmpty'), 'table is initially empty');
+  rowsArray.pushObject({});
+  assert.notOk(table.get('isEmpty'), 'table is not empty after a row was pushed');
+  rowsArray.clear();
+  assert.ok(table.get('isEmpty'), 'table is empty again after the rows were cleared');
 });
 
 test('table method - setRows', function(assert) {
@@ -496,4 +520,28 @@ test('table modifications with sync enabled - sort', function(assert) {
 
   assert.equal(table.get('rows.length'), rows.get('length'));
   assert.deepEqual(table.get('rows').getEach('position'), rows.getEach('position'));
+});
+
+test('setRowsSynced', function(assert) {
+  let initialRows = emberArray([]);
+  let otherRows = emberArray([]);
+  let table = new Table([], initialRows, { enableSync: true });
+  let initialLength = 5;
+  let otherLength = 13;
+
+  for (let i = 0; i < initialLength; i++) {
+    initialRows.pushObject({ position: i });
+  }
+  assert.deepEqual(table.get('rows').getEach('position'), initialRows.getEach('position'), 'the table is initialized with a synced array');
+
+  table.setRowsSynced(otherRows);
+  assert.deepEqual(table.get('rows').getEach('position'), otherRows.getEach('position'), 'the synced array may be replaced');
+
+  for (let i = 0; i < otherLength; i++) {
+    otherRows.pushObject({ position: i });
+  }
+  assert.deepEqual(table.get('rows').getEach('position'), otherRows.getEach('position'), 'the replacement array is correctly synced');
+
+  initialRows.popObject();
+  assert.deepEqual(table.get('rows').getEach('position'), otherRows.getEach('position'), 'mutating the replaced array has no effect');
 });

@@ -1,11 +1,7 @@
-import Ember from 'ember';
+import Component from '@ember/component';
+import { computed } from '@ember/object';
 import layout from 'ember-light-table/templates/components/cells/base';
 import cssStyleify from 'ember-light-table/utils/css-styleify';
-
-const {
-  Component,
-  computed
-} = Ember;
 
 /**
  * @module Light Table
@@ -24,10 +20,18 @@ const Cell = Component.extend({
   attributeBindings: ['style'],
   classNameBindings: ['align', 'isSorted', 'column.cellClassNames'],
 
+  enableScaffolding: false,
+
   isSorted: computed.readOnly('column.sorted'),
 
-  style: computed('column.width', function() {
-    return cssStyleify(this.get('column').getProperties(['width']));
+  style: computed('enableScaffolding', 'column.width', function() {
+    let column = this.get('column');
+
+    if (this.get('enableScaffolding') || !column) {
+      return '';
+    }
+
+    return cssStyleify(column.getProperties(['width']));
   }),
 
   align: computed('column.align', function() {
@@ -57,6 +61,12 @@ const Cell = Component.extend({
    * @type {Object}
    */
   tableActions: null,
+
+  /**
+   * @property extra
+   * @type {Object}
+   */
+  extra: null,
 
   /**
    * @property rawValue

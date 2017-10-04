@@ -1,13 +1,8 @@
-import Ember from 'ember';
+import Component from '@ember/component';
+import { computed, observer } from '@ember/object';
 import layout from 'ember-light-table/templates/components/lt-body';
+import { run } from '@ember/runloop';
 import Row from 'ember-light-table/classes/Row';
-
-const {
-  Component,
-  computed,
-  run,
-  observer
-} = Ember;
 
 /**
  * @module Light Table
@@ -63,6 +58,12 @@ export default Component.extend({
    * @type {Object}
    */
   tableActions: null,
+
+  /**
+   * @property extra
+   * @type {Object}
+   */
+  extra: null,
 
   /**
    * Allows a user to select a row on click. All this will do is apply the necessary
@@ -161,6 +162,21 @@ export default Component.extend({
    * @default false
    */
   overwrite: false,
+
+  /**
+   * If true, the body will prepend an invisible `<tr>` that scaffolds the
+   * widths of the table cells.
+   *
+   * ember-light-table uses [`table-layout: fixed`](https://developer.mozilla.org/en-US/docs/Web/CSS/table-layout).
+   * This means, that the widths of the columns are defined by the first row
+   * only. By prepending this scaffolding row, widths of columns only need to
+   * be specified once.
+   *
+   * @property enableScaffolding
+   * @type {Boolean}
+   * @default false
+   */
+  enableScaffolding: false,
 
   /**
    * ID of main table component. Used to generate divs for ember-wormhole
