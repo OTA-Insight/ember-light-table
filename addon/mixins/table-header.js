@@ -1,7 +1,9 @@
 import Mixin from '@ember/object/mixin';
-import { computed } from '@ember/object';
+import { computed, trySet } from '@ember/object';
 import { isEmpty } from '@ember/utils';
 import { warn } from '@ember/debug';
+import { inject as service } from '@ember/service';
+import cssStyleify from 'ember-light-table/utils/css-styleify';
 
 /**
  * @module Light Table
@@ -14,6 +16,10 @@ import { warn } from '@ember/debug';
  */
 
 export default Mixin.create({
+  attributeBindings: ['style'],
+
+  scrollbarThickness: service(),
+
   /**
    * @property table
    * @type {Table}
@@ -107,6 +113,15 @@ export default Mixin.create({
   iconDescending: '',
 
   /**
+   * Custom sorting component name to use instead of the default `<i class="lt-sort-icon"></i>` template.
+   * See `iconSortable`, `iconAsending`, or `iconDescending`.
+   * @property iconComponent
+   * @type {String}
+   * @default false
+   */
+  iconComponent: null,
+
+  /**
    * ID of main table component. Used to generate divs for ember-wormhole
    * @type {String}
    */
@@ -117,15 +132,25 @@ export default Mixin.create({
   subColumns: computed.readOnly('table.visibleSubColumns'),
   columns: computed.readOnly('table.visibleColumns'),
 
-  sortIcons: computed('iconSortable', 'iconAscending', 'iconDescending', function() {
-    return this.getProperties(['iconSortable', 'iconAscending', 'iconDescending']);
+  sortIcons: computed('iconSortable', 'iconAscending', 'iconDescending', 'iconComponent', function() {
+    return this.getProperties(['iconSortable', 'iconAscending', 'iconDescending', 'iconComponent']);
+  }).readOnly(),
+
+  style: computed('sharedOptions.occlusion', function() {
+    if (this.get('sharedOptions.occlusion')) {
+      const scrollbarThickness = this.get('scrollbarThickness.thickness');
+      return cssStyleify({ paddingRight: `${scrollbarThickness}px` });
+    }
   }).readOnly(),
 
   init() {
     this._super(...arguments);
 
-    let fixed = this.get('fixed');
-    let height = this.get('sharedOptions.height');
+    const fixed = this.get('fixed');
+    const sharedOptionsFixedPath = `sharedOptions.${this.get('sharedOptionsFixedKey')}`;
+    trySet(this, sharedOptionsFixedPath, fixed);
+
+    const height = this.get('sharedOptions.height');
 
     warn(
       'You did not set a `height` attribute for your table, but marked a header or footer to be fixed. This means that you have to set the table height via CSS. For more information please refer to:  https://github.com/offirgolan/ember-light-table/issues/446',

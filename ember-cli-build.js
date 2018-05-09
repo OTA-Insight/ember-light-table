@@ -1,4 +1,5 @@
-/* eslint-env node */
+'use strict';
+
 const EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
 module.exports = function(defaults) {
@@ -8,6 +9,10 @@ module.exports = function(defaults) {
     autoprefixer: {
       browsers: ['last 2 versions'],
       cascade: false
+    },
+
+    'ember-cli-babel': {
+      includePolyfill: true
     }
   });
 

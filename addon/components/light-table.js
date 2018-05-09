@@ -3,7 +3,6 @@ import Component from '@ember/component';
 import { computed, observer } from '@ember/object';
 import { isEmpty, isNone } from '@ember/utils';
 import { assert } from '@ember/debug';
-import { on } from '@ember/object/evented';
 import { inject as service } from '@ember/service';
 import layout from 'ember-light-table/templates/components/light-table';
 import Table from 'ember-light-table/classes/Table';
@@ -38,10 +37,11 @@ function intersections(array1, array2) {
 
 const LightTable = Component.extend({
   layout,
-  classNameBindings: [':ember-light-table'],
+  classNameBindings: [':ember-light-table', 'occlusion'],
   attributeBindings: ['style'],
 
   media: service(),
+  scrollbarThickness: service(),
 
   /**
    * @property table
@@ -160,6 +160,27 @@ const LightTable = Component.extend({
   breakpoints: null,
 
   /**
+   * Toggles occlusion rendering functionality. Currently experimental.
+   * If set to true, you must set {{#crossLink 't.body/estimatedRowHeight:property'}}{{/crossLink}} to
+   * something other than the default value.
+   *
+   * @property occlusion
+   * @type Boolean
+   * @default False
+   */
+  occlusion: false,
+
+  /**
+   * Estimated size of a row. Used in `vertical-collection` to determine roughly the number
+   * of rows exist out of the viewport.
+   *
+   * @property estimatedRowHeight
+   * @type Number
+   * @default false
+   */
+  estimatedRowHeight: 0,
+
+  /**
    * Table component shared options
    *
    * @property sharedOptions
@@ -170,7 +191,9 @@ const LightTable = Component.extend({
     return {
       height: this.get('height'),
       fixedHeader: false,
-      fixedFooter: false
+      fixedFooter: false,
+      occlusion: this.get('occlusion'),
+      estimatedRowHeight: this.get('estimatedRowHeight')
     };
   }).readOnly(),
 
@@ -189,7 +212,7 @@ const LightTable = Component.extend({
    * @type {Number}
    * @private
    */
-  totalWidth: computed('visibleColumns.[]', 'visibleColumns.@each.width', function() {
+  totalWidth: computed('visibleColumns.@each.width', function() {
     let visibleColumns = this.get('visibleColumns');
     let widths = visibleColumns.getEach('width');
     let unit = (widths[0] || '').match(/\D+$/);
@@ -218,12 +241,18 @@ const LightTable = Component.extend({
     return `${totalWidth}${unit}`;
   }),
 
-  style: computed('totalWidth', 'height', function() {
+  style: computed('totalWidth', 'height', 'occlusion', function() {
     let totalWidth = this.get('totalWidth');
     let style = this.getProperties(['height']);
 
     if (totalWidth) {
-      style.width = totalWidth;
+      if (this.get('occlusion')) {
+        const scrollbarThickness = this.get('scrollbarThickness.thickness');
+        style.width = `calc(${totalWidth} + ${scrollbarThickness}px)`;
+      } else {
+        style.width = totalWidth;
+      }
+
       style.overflowX = 'auto';
     }
 
@@ -241,9 +270,11 @@ const LightTable = Component.extend({
     if (isNone(media)) {
       this.set('responsive', false);
     }
+
+    this.onMediaChange();
   },
 
-  onMediaChange: on('init', observer('media.matches.[]', 'table.allColumns.[]', function() {
+  onMediaChange: observer('media.matches.[]', 'table.allColumns.[]', function() {
     let responsive = this.get('responsive');
     let matches = this.get('media.matches');
     let breakpoints = this.get('breakpoints');
@@ -273,7 +304,7 @@ const LightTable = Component.extend({
     }
 
     this.send('onAfterResponsiveChange', matches);
-  })),
+  }),
 
   _displayColumns(numColumns) {
     let table = this.get('table');
