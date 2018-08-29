@@ -1,8 +1,7 @@
 import Component from '@ember/component';
-import { observer } from '@ember/object';
-import { run } from '@ember/runloop';
 import layout from '../templates/components/lt-infinity';
 import InViewportMixin from 'ember-in-viewport';
+import { get } from '@ember/object';
 
 export default Component.extend(InViewportMixin, {
   classNames: ['lt-infinity'],
@@ -10,62 +9,33 @@ export default Component.extend(InViewportMixin, {
   layout,
 
   rows: null,
-  scrollBuffer: 0,
+  scrollableContent: null,
+  scrollBuffer: 50,
 
   didInsertElement() {
     this._super(...arguments);
 
     let scrollBuffer = this.get('scrollBuffer');
     let width = this.$().width();
+    let scrollableContent = this.get('scrollableContent');
 
     this.setProperties({
       viewportSpy: true,
-      viewportUseIntersectionObserver: false,
       viewportTolerance: {
         left: width,
         right: width,
         bottom: scrollBuffer,
         top: 0
-      }
+      },
+      scrollableArea: scrollableContent
     });
   },
 
-  willDestroyElement() {
-    this._super(...arguments);
-    this._cancelTimers();
-  },
-
   didEnterViewport() {
-    this._debounceScrolledToBottom();
+    get(this, 'inViewport')();
   },
 
   didExitViewport() {
-    this._cancelTimers();
-  },
-
-  scheduleScrolledToBottom: observer('rows.[]', 'viewportEntered', function() {
-    if (this.get('viewportEntered')) {
-      /*
-       Continue scheduling onScrolledToBottom until no longer in viewport
-       */
-      this._scheduleScrolledToBottom();
-    }
-  }),
-
-  _scheduleScrolledToBottom() {
-    this._schedulerTimer = run.scheduleOnce('afterRender', this, this._debounceScrolledToBottom);
-  },
-
-  _debounceScrolledToBottom(delay = 100) {
-    /*
-     This debounce is needed when there is not enough delay between onScrolledToBottom calls.
-     Without this debounce, all rows will be rendered causing immense performance problems
-     */
-    this._debounceTimer = run.debounce(this, this.sendAction, 'onScrolledToBottom', delay);
-  },
-
-  _cancelTimers() {
-    run.cancel(this._schedulerTimer);
-    run.cancel(this._debounceTimer);
+    get(this, 'exitViewport')();
   }
 });

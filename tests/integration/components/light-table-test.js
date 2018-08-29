@@ -1,7 +1,7 @@
 import { scrollTo } from 'ember-native-dom-helpers';
 import { setupRenderingTest } from 'ember-qunit';
 import { render, findAll, find, click } from '@ember/test-helpers';
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 import hbs from 'htmlbars-inline-precompile';
 import setupMirageTest from 'ember-cli-mirage/test-support/setup-mirage';
 import Table from 'ember-light-table';
@@ -27,7 +27,7 @@ module('Integration | Component | light table', function(hooks) {
     assert.equal(find('*').textContent.trim(), '');
   });
 
-  skip('scrolled to bottom', async function(assert) {
+  test('scrolled to bottom', async function(assert) {
     assert.expect(4);
 
     this.set('table', new Table(Columns, this.server.createList('user', 50)));
@@ -49,7 +49,7 @@ module('Integration | Component | light table', function(hooks) {
     let { scrollHeight } = find(scrollContainer);
 
     assert.ok(findAll(scrollContainer).length > 0, 'scroll container was rendered');
-    assert.equal(scrollHeight, 2500, 'scroll height is 2500');
+    assert.equal(scrollHeight, 2501, 'scroll height is 2500 + 1px for height of lt-infinity');
 
     await scrollTo(scrollContainer, 0, scrollHeight);
   });

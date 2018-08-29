@@ -66,6 +66,13 @@ export default Component.extend({
   extra: null,
 
   /**
+   * @property isInViewport
+   * @default false
+   * @type {Boolean}
+   */
+  isInViewport: false,
+
+  /**
    * Allows a user to select a row on click. All this will do is apply the necessary
    * CSS classes and add the row to `table.selectedRows`. If `multiSelect` is disabled
    * only one row will be selected at a time.
@@ -309,6 +316,19 @@ export default Component.extend({
   columns: computed.readOnly('table.visibleColumns'),
   colspan: computed.readOnly('columns.length'),
 
+  /**
+   * fills the screen with row items until lt-infinity component has exited the viewport
+   * @property scheduleScrolledToBottom
+   */
+  scheduleScrolledToBottom: observer('rows.[]', 'isInViewport', function() {
+    if (this.get('isInViewport')) {
+      /*
+       Continue scheduling onScrolledToBottom until no longer in viewport
+       */
+      this._schedulerTimer = run.scheduleOnce('afterRender', this, this._debounceScrolledToBottom);
+    }
+  }),
+
   _prevSelectedIndex: -1,
 
   init() {
@@ -329,8 +349,7 @@ export default Component.extend({
 
   destroy() {
     this._super(...arguments);
-    run.cancel(this._checkTargetOffsetTimer);
-    run.cancel(this._setTargetOffsetTimer);
+    this._cancelTimers();
   },
 
   _setupVirtualScrollbar() {
@@ -407,6 +426,27 @@ export default Component.extend({
     }
   },
 
+  /**
+   * @method _debounceScrolledToBottom
+   */
+  _debounceScrolledToBottom(delay = 100) {
+    /*
+     This debounce is needed when there is not enough delay between onScrolledToBottom calls.
+     Without this debounce, all rows will be rendered causing immense performance problems
+     */
+    this._debounceTimer = run.debounce(this, this.sendAction, 'onScrolledToBottom', delay);
+  },
+
+  /**
+   * @method _cancelTimers
+   */
+  _cancelTimers() {
+    run.cancel(this._checkTargetOffsetTimer);
+    run.cancel(this._setTargetOffsetTimer);
+    run.cancel(this._schedulerTimer);
+    run.cancel(this._debounceTimer);
+  },
+
   actions: {
     /**
      * onRowClick action. Handles selection, and row expansion.
@@ -480,12 +520,18 @@ export default Component.extend({
     },
 
     /**
-     * onScrolledToBottom action - sent when user scrolls to the bottom
-     *
-     * @event onScrolledToBottom
+     * lt-infinity action to determine if component is still in viewport
+     * @event inViewport
      */
-    onScrolledToBottom() {
-      this.sendAction('onScrolledToBottom');
+    inViewport() {
+      this.set('isInViewport', true);
+    },
+    /**
+     * lt-infinity action to determine if component has exited the viewport
+     * @event exitViewport
+     */
+    exitViewport() {
+      this.set('isInViewport', false);
     },
 
     firstVisibleChanged(item, index /* , key */) {
